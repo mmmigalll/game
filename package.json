@@ -1,0 +1,11 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "author": "Vash",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.12.3"
+  }
+}
