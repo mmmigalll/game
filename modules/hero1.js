@@ -4,8 +4,8 @@ var Environment = require('./env.js');
 
 function Warior(name, a, b, str, speed, cH){ // функція конструктор 1-го персонажу
     this.name = name; // ім'я
-    this.x = a; // позиція х
-    this.y = b; // позиція у
+    this.x = (a > 0) ? a : 0; // позиція х
+    this.y = (b > 0) ? b : 0; // позиція у
     this.strenght = str; // сила
     this.speed = speed; // швидкість
     this.colorHair = cH; // колір волося
@@ -32,26 +32,23 @@ Warior.prototype = {
         }
     },
 
-    moveTo: function(x, y){ // метод руху персонажа
+    moveTo: function(x, y){ // метод руху персонажа (я переробив без затримки бо тут  чомусь SetInterval не коректно себе поводить)
         var self = this;
         var x2 = self.x;
         var y2 = self.y;
         var sX = x - x2;
         var sY = y - y2;
         var sD = Math.sqrt(sX * sX + sY * sY);
-        var tanAngle = sX / sY;
-        var angle = Math.atan(tanAngle);
-        var vect;
 
         if (sD < self.distance){
-            x2 = sD * Math.sin(angle);
-            y2 = sD * Math.cos(angle);
+            x2 = x;
+            y2 = y;
         } else {
-            x2 = self.distance * Math.sin(angle);
-            y2 = self.distance * Math.cos(angle);
+            x2 += sX * self.distance / sD;
+            y2 += sY * self.distance / sD;
         }
 
-        vect = new Vector(x2, y2);
+        vect = new Vector(parseInt(x2), parseInt(y2));
 
         vect = Environment.wind(vect);
         vect = Environment.envRes(vect);
@@ -59,8 +56,8 @@ Warior.prototype = {
         x2 = vect.x;
         y2 = vect.y;
 
-        this.x = Math.floor(x2);
-        this.y = Math.floor(y2);
+        this.x = (Math.floor(x2) > 0) ? Math.floor(x2) : 0;
+        this.y = (Math.floor(y2) > 0) ? Math.floor(y2) : 0;
         console.log(this.x + ' ' + this.y);
         return this;
 
