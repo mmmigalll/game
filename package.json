@@ -6,7 +6,6 @@
   "author": "Vash",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.12.3",
-    "mongoose": "^4.0.1"
+    "express": "^4.12.3"
   }
 }

@@ -1,20 +1,16 @@
 var express = require('express');
-var mongoose = require('mongoose');
+
 var app = express();
 
-var db = mongoose.createConnection('mongodb://localhost/hero');
+
+var Warior = require('./modules/hero1.js');
+var Wizard = require('./modules/hero2.js');
+
+var war = new Warior("Misha", 0, 0, 25, 100, "Red");
+var wiz = new Wizard("Petya", 0, 0, 25, 50, 60, "White");
+war.moveTo(10, 20).fight(wiz);
 
 
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function callback() {
-
-   console.log("Connection to mainDB is success");
-
-   app.set('db', db);
-   require('./routes/index.js')(app);
-
-   app.listen(3030, function(){
-      console.log('--- Express start successful ---');
-   });
+app.listen(3000, function(){
+   console.log("___Server Up successfully___");
 });
-
