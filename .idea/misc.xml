@@ -39,7 +39,5 @@
     </properties>
   </component>
   <component name="IdProvider" IDEtalkID="DED9DCCC2E22B5337C0293906101CA8A" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true">
-    <output url="file://$PROJECT_DIR$/out" />
-  </component>
+  <component name="ProjectRootManager" version="2" />
 </project>
