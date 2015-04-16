@@ -1,0 +1,13 @@
+{
+  "name": "game",
+  "version": "0.0.0",
+  "description": "",
+  "main": "main.js",
+  "author": "soundstorm",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "express": "~4.12.3",
+    "body-parser": "~1.12.2",
+    "path": "~0.11.14"
+  }
+}
