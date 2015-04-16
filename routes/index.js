@@ -1,135 +1,65 @@
+/**
+ * Created by soundstorm on 28.03.15.
+ */
+module.exports = function(app, arena){
+    var character = require('./character.js');
+    var path = require('path');
 
-module.exports = function(app) {
-    var mongoose = require('mongoose');
-    var Warior = require('../modules/hero1.js');
-    var Wizard = require('../modules/hero2.js');
-    var schema = mongoose.Schema;
-    var war = new Warior("Misha", 0, 0, 25, 100, "Red");
+    app.post('/addChar', function (req, res, next) {
+        var body = req.body;
+        var char = {};
+        char.id = arena.lastId;
+        arena.lastId += 1;
+        (body.name) ? char.name = body.name : char.name = '';
+        (body.race) ? char.race = body.race : char.race = 0;
+        (body.class) ? char.class = body.class : char.class = 0;
+        var hero = new character(char.id, char.name, char.race, char.class);
+        hero.enterCanvas(arena);
+        console.log('Hero created and went to arena:');
+        console.dir(char);
+        console.dir(hero.cur_pos);
+    });
 
-    var wiz = new Wizard("Petya", 0, 0, 25, 50, 60, "White");
-    var heroes = [war, wiz]; // створюємо масив героїв, з якого по id будемо витягати певного героя
-    var db = app.get('db');
-    var HeroModel;
-
-    heroSchema = new schema({ // схема для збереження в базу (на мою думку така!!!!, Ви може думаєте по інакшому)
-        id: Number,
-        currentPosition: {x: Number, y: Number},
-        health: Number,
-        moveToPosition: {x: Number, y: Number}
-    }, {collection: 'heroesStats'});
-
-    HeroModel = db.model('heroSchema', heroSchema);
-
-
-
-    app.get('/moveTo/:id', function(req, res, next){
-        var id = req.params.id;
-        var hero = heroes[id];
-        var moveToX;
-        var moveToY;
-        var insertObj;
-        var currPos;
-        var moveToPos;
-        var insHero;
-        var findObj = {
-            id: id
-        }
-        HeroModel.find(findObj).exec(function(err, result){
-            if (err){
-                return res.status(500).send('Error');
+    app.post('/:id/moveTo', function (req, res, next) {
+        var body = req.body;
+        arena.heroes.forEach(function(hero){
+            if (hero.id == req.params.id) {
+                if (body.x && body.y) {
+                    var cur_pos = hero.cur_pos;
+                    hero.move({"x":body.x, "y":body.y});
+                    console.log('Hero, ', hero.name, ', moved to ', hero.end_pos, 'from: ', cur_pos);
+                    console.log('Stoped at {' + hero.cur_pos.x + ', ' + hero.cur_pos.y + '}');
+                } else {
+                    hero.move(hero.end_pos);
+                }
             }
-            if (result){
-                moveToX = result.moveToPosition.x;
-                moveToY = result.moveToPosition.y;
+        });
+    });
+    app.get('/:id/fight/:target_id', function (req, res, next) {
+        var body = req.body;
+        var hero_attacker;
+        var hero_target;
 
-                hero.x = result.currentPosition.x;
-                hero.y = result.currentPosition.y;
-                hero.health = result.health;
-
-                hero.moveTo(moveToX, moveToY);
-                currPos = {
-                    x: hero.x,
-                    y: hero.y
-                };
-
-                moveToPos = {
-                    x: moveToX,
-                    y: moveToY
-                };
-
-                insertObj = {
-                    id: id,
-                    currentPosition: currPos,
-                    health: hero.health,
-                    moveToPosition: moveToPos
-                };
-
-                insHero = new HeroModel(insertObj);
-                insHero.save(function(err){
-                    if (err){
-                        return res.status(500).send('Error');
-                    }
-                    res.status(200).send(hero.name + ' is moving');
-                });
-
+        arena.heroes.forEach(function(hero) {
+            if (hero.id == req.params.id) {
+                hero_attacker = hero;
+            } else if (hero.id == req.params.target_id ){
+                hero_target = hero;
+            }
+        });
+        if (hero_attacker && hero_target) {
+            if (hero_target.cur_hp > 0) {
+                hero_attacker.fight(hero_target);
+                console.log(hero_attacker.cur_pos, hero_attacker.end_pos);
+                console.log(hero_target.cur_pos, hero_target.end_pos);
+                console.dir(hero_target.cur_hp);
+                res.status(200).send(hero_attacker.name + " is moving");
             } else {
-                res.status(500).send('Use moveTo/id/x/y/');
+                res.status(200).send(hero_target.name + " is allready dead!");
             }
-        });
-    });
-    app.get('/moveTo/:id/:x/:y', function(req, res, next){
-        var id = req.params.id; // id героя в масиві. в загальному випадку від 0 до 9
-        var x = req.params.x;
-        var y = req.params.y;
-        var hero = heroes[id];
-
-
-        var moveToX;
-        var moveToY;
-        var insertObj;
-        var currPos;
-        var moveToPos;
-        var insHero;
-        var findObj = {
-            id: id
+        } else {
+            console.log('Wrong ids');
+            return
         }
-        HeroModel.find(findObj).exec(function(err, result){
-            if (err){
-                return res.status(500).send('Error');
-            }
-            if (result){
-
-                hero.x = result.currentPosition.x;
-                hero.y = result.currentPosition.y;
-                hero.health = result.health;
-
-                hero.moveTo(moveToX, moveToY);
-                currPos = {
-                    x: hero.x,
-                    y: hero.y
-                };
-
-                moveToPos = {
-                    x: x,
-                    y: y
-                };
-
-                insertObj = {
-                    id: id,
-                    currentPosition: currPos,
-                    health: hero.health,
-                    moveToPosition: moveToPos
-                };
-
-                insHero = new HeroModel(insertObj);
-                insHero.save(function(err){
-                    if (err){
-                        return res.status(500).send('Error');
-                    }
-                    res.status(200).send(hero.name + ' is moving');
-                })
-
-            }
-        });
     });
-}
+};
