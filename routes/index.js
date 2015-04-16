@@ -2,7 +2,7 @@
  * Created by soundstorm on 28.03.15.
  */
 module.exports = function(app, arena){
-    var character = require('./character.js');
+    var character = require('../modules/character.js');
     var path = require('path');
 
     app.post('/addChar', function (req, res, next) {

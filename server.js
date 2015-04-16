@@ -1,5 +1,5 @@
 var character = require('./modules/character.js');
-var arena = require('./modules/canvas.js');
+var canva = require('./modules/canvas.js');
 var express = require('express');
 var path = require('path');
 var http = require('http');
@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 var hero2 = new character('Pupkin2', 1, 0);*/
 
 
-
+var arena = new canva();
 arena.setWind(100, 45);
 
 
