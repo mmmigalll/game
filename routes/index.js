@@ -1,27 +1,50 @@
 
 module.exports = function(app) {
+
     var mongoose = require('mongoose');
     var Warior = require('../modules/hero1.js');
     var Wizard = require('../modules/hero2.js');
     var schema = mongoose.Schema;
-    var war = new Warior("Misha", 0, 0, 25, 100, "Red");
+    var war = new Warior("MIsha", 0, 0, 25, 100, "red");
 
     var wiz = new Wizard("Petya", 0, 0, 25, 50, 60, "White");
-    var heroes = [war, wiz]; // створюємо масив героїв, з якого по id будемо витягати певного героя
+     // створюємо масив героїв, з якого по id будемо витягати певного героя
     var db = app.get('db');
     var HeroModel;
 
     heroSchema = new schema({ // схема для збереження в базу (на мою думку така!!!!, Ви може думаєте по інакшому)
         id: Number,
-        currentPosition: {x: Number, y: Number},
+        currentPosition: {
+            x: Number,
+            y: Number
+        },
         health: Number,
-        moveToPosition: {x: Number, y: Number}
+        moveToPosition: {
+            x: Number,
+            y: Number
+        }
     }, {collection: 'heroesStats'});
 
     HeroModel = db.model('heroSchema', heroSchema);
 
-
-
+    app.post('/hero', function(req, res, next){
+        var body = req.body;
+        war = new Warior(body.name, body.x, body.y, body.strenght, body.speed, body.colorHair);
+        var insertObj = {
+            id: body.id,
+            currentPosition: {x: body.x, y: body.y},
+            health: war.health,
+            moveToPosition: {x: body.x, y: body.y}
+        }
+        var hero = new HeroModel(insertObj);
+        hero.save(function(err){
+            if(err){
+                return res.status(500).send(err);
+            }
+            res.status(200).send(war.name + ' added successfully');
+        })
+    });
+    var heroes = [war, wiz];
     app.get('/moveTo/:id', function(req, res, next){
         var id = req.params.id;
         var hero = heroes[id];
@@ -33,8 +56,13 @@ module.exports = function(app) {
         var insHero;
         var findObj = {
             id: id
+        };
+        var projectObj = {
+            _id: 0,
+            __v: 0
         }
-        HeroModel.find(findObj).exec(function(err, result){
+
+        HeroModel.find(findObj, projectObj).exec(function(err, result){
             if (err){
                 return res.status(500).send('Error');
             }
@@ -92,16 +120,22 @@ module.exports = function(app) {
         var insHero;
         var findObj = {
             id: id
-        }
-        HeroModel.find(findObj).exec(function(err, result){
+        };
+        var projectObj = {
+            _id: 0,
+            __v: 0
+        };
+        HeroModel.find(findObj, projectObj).exec(function(err, result){
             if (err){
                 return res.status(500).send('Error');
             }
             if (result){
+                moveToX = x;
+                moveToY = y;
 
-                hero.x = result.currentPosition.x;
-                hero.y = result.currentPosition.y;
-                hero.health = result.health;
+                /*hero.x = result[0].currentPosition.x;
+                hero.y = result[0].currentPosition.y;*/
+                hero.health = result[0].health;
 
                 hero.moveTo(moveToX, moveToY);
                 currPos = {
@@ -121,13 +155,13 @@ module.exports = function(app) {
                     moveToPosition: moveToPos
                 };
 
-                insHero = new HeroModel(insertObj);
-                insHero.save(function(err){
+                //insHero = new HeroModel(insertObj);
+                HeroModel.update({id: id}, insertObj ,function(err){
                     if (err){
                         return res.status(500).send('Error');
                     }
                     res.status(200).send(hero.name + ' is moving');
-                })
+                });
 
             }
         });
